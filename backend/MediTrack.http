@@ -1,4 +1,4 @@
-@MediTrack_HostAddress = http://localhost:5066
+@MediTrack_HostAddress = http://localhost:5109
 
 GET {{MediTrack_HostAddress}}/weatherforecast/
 Accept: application/json
