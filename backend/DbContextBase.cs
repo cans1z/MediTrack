@@ -11,6 +11,6 @@ public class ApplicationContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=contacts.db");
+        optionsBuilder.UseSqlite("Data Source=meditrack.db");
     }
 }
