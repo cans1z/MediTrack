@@ -10,19 +10,27 @@ namespace MediTrack.Controllers;
 public class AuthController : ControllerBase
 {
     [HttpPost("login")]
-    public ActionResult Login(LoginDto data)
+    public ActionResult Login([FromBody] LoginDto data)
     {
-        using (var db = new ApplicationContext())
+        using var db = new ApplicationContext();
+        var user = db.Users.FirstOrDefault(i => i.UserName == data.Username && i.Password == data.Password);
+        if (user == null || user.IsBanned) return Unauthorized();
+
+        var oldSessions = db.Sessions.Where(s => s.UserId == user.Id && s.IsActive);
+        foreach (var s in oldSessions) s.IsActive = false;
+
+        var newSession = new Session
         {
-            var user = db.Users
-                .Where(i => i.Password == data.Password && i.UserName == data.Username)
-                .FirstOrDefault();
-            if (user == null) return Unauthorized();
-            var session = new Session { UserId = user.Id, IsActive = true, Token = $"{Guid.NewGuid()}" };
-            db.Sessions.Add(session);
-            db.SaveChanges();
-            return Ok(session);
-        }
+            UserId = user.Id,
+            Token = Guid.NewGuid().ToString(),
+            IsActive = true,
+            AuthDate = DateTime.UtcNow
+        };
+
+        db.Sessions.Add(newSession);
+        db.SaveChanges();
+
+        return Ok(new { token = newSession.Token });
     }
 
     [HttpGet("fetch")]
