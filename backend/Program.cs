@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 
 namespace MediTrack
 {
@@ -7,9 +8,16 @@ namespace MediTrack
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.UseInlineDefinitionsForEnums();
+            });
 
             var app = builder.Build();
 
@@ -19,6 +27,7 @@ namespace MediTrack
                 app.UseSwaggerUI();
             }
 
+            //app.UseMiddleware<AuthMiddleware>();
             app.UseAuthorization();
             app.MapControllers();
             app.Run();

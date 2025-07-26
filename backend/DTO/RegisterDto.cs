@@ -16,7 +16,7 @@ public class RegisterDto
             UserName = this.UserName,
             Email = this.Email,
             Role = this.Role,
-            Password = this.Password // plain
+            Password = this.Password
         };
     }
 }

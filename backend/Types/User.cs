@@ -10,8 +10,8 @@ public class User
     public string Password { get; set; }
     public string Email { get; set; }
     public UserRole Role { get; set; }
-    public bool IsBanned { get; set; }
-    public bool IsDeleted { get; set; }
+    public bool IsBanned { get; set; } = false;
+    public bool IsDeleted { get; set; } = false;
     
     public ICollection<Session> Sessions { get; set; }
 }

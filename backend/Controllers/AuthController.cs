@@ -13,7 +13,7 @@ public class AuthController : ControllerBase
     public ActionResult Login([FromBody] LoginDto data)
     {
         using var db = new ApplicationContext();
-        var user = db.Users.FirstOrDefault(i => i.UserName == data.Username && i.Password == data.Password);
+        var user = db.Users.FirstOrDefault(i => i.UserName == data.UserName && i.Password == data.Password);
         if (user == null || user.IsBanned) return Unauthorized();
 
         var oldSessions = db.Sessions.Where(s => s.UserId == user.Id && s.IsActive);
@@ -55,6 +55,6 @@ public class AuthController : ControllerBase
 
 public class LoginDto
 {
-    public string Username { get; set; }    
+    public string UserName { get; set; }
     public string Password { get; set; }
 }
