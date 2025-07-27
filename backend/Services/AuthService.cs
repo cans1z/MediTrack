@@ -1,16 +1,18 @@
+using MediTrack.DTO;
 using MediTrack.Types;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace MediTrack.Services;
 
 public class UnauthorizedException : Exception
 {
-    public UnauthorizedException() : base("authorization error. token is invalid") 
-    {}
+    public UnauthorizedException() : base("authorization error. token is invalid") {}
 }
+
 public class AuthService
 {
-    public static User ValidateToken(string token)
+    public User ValidateToken(string token)
     {
         using (var db = new ApplicationContext())
         {
@@ -22,4 +24,7 @@ public class AuthService
             return session.User;
         }
     }
+    
+    
+    
 }

@@ -9,6 +9,12 @@ namespace MediTrack.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
+    private readonly AuthService _authService;
+
+    public AuthController(AuthService authService)
+    {
+        _authService = authService;
+    }
     [HttpPost("login")]
     public ActionResult Login([FromBody] LoginDto data)
     {
@@ -38,7 +44,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = AuthService.ValidateToken(token);
+            var user = _authService.ValidateToken(token);
             return Ok(user);
         }
         catch (UnauthorizedException unex)
@@ -57,4 +63,5 @@ public class LoginDto
 {
     public string UserName { get; set; }
     public string Password { get; set; }
+    public string Email { get; set; }
 }

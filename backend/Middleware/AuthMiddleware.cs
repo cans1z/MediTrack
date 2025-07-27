@@ -11,7 +11,12 @@ public class AuthMiddleware
     {
         _next = next;
     }
+    private readonly AuthService _authService;
 
+    public AuthMiddleware(AuthService authService)
+    {
+        _authService = authService;
+    }
     public async Task Invoke(HttpContext context)
     {
         var path = context.Request.Path.Value?.ToLower();
@@ -41,7 +46,7 @@ public class AuthMiddleware
         }
         try
         {
-            var user = AuthService.ValidateToken(token);
+            var user = _authService.ValidateToken(token);
             context.Items["User"] = user; // сохраняем пользователя в контекст
         }
         catch (UnauthorizedException)

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MediTrack.Services;
 
 namespace MediTrack
 {
@@ -18,6 +19,8 @@ namespace MediTrack
             {
                 options.UseInlineDefinitionsForEnums();
             });
+            builder.Services.AddSingleton<AuthService>();
+            builder.Services.AddSingleton<UserService>();
 
             var app = builder.Build();
 
