@@ -49,9 +49,10 @@ public class UserController : ControllerBase
                 return BadRequest("You dont have permission to delete this user");
             using (var db = new ApplicationContext())
             {
-                var delUser = deleteUserDto;
-                var ad = db.Users.FirstOrDefault(u => u.Email == deleteUserDto.Email);
-                db.Users.Remove(ad);
+                var delUser = db.Users.FirstOrDefault(u => u.Email == deleteUserDto.Email);
+                if (delUser == null) 
+                    return BadRequest("User not found");
+                db.Users.Remove(delUser);
                 db.SaveChanges();
                 return NoContent();
             } 
@@ -67,8 +68,46 @@ public class UserController : ControllerBase
     }
     
     //update user
+    [HttpPut("update")]
+    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateDto updateUserDto)
+    {
+        try
+        {
+            var user = AuthService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
+                return BadRequest("You dont have permission to update this user");
+            using (var db = new ApplicationContext())
+            {
+                var upUser = db.Users.FirstOrDefault(u => u.Email == updateUserDto.Email);
+                if (upUser == null)
+                    return BadRequest("User not found");
+                if (!string.IsNullOrWhiteSpace(updateUserDto.NewEmail))
+                    upUser.Email = updateUserDto.NewEmail;
+                if (!string.IsNullOrWhiteSpace(updateUserDto.NewPassword))
+                    upUser.Password = updateUserDto.NewPassword;
+                if (updateUserDto.NewRole.HasValue)
+                    upUser.Role = updateUserDto.NewRole.Value;
+                if (!string.IsNullOrWhiteSpace(updateUserDto.NewName))
+                    upUser.UserName = updateUserDto.NewName;
+                if (updateUserDto.IsBanned.HasValue)
+                    upUser.IsBanned = updateUserDto.IsBanned.Value;
+                db.Users.Update(upUser);
+                db.SaveChanges();
+                return NoContent();
+            }
+        }
+        catch (UnauthorizedException unex)
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     
     //get users
+    
 }
     
 /*
@@ -92,4 +131,5 @@ public class RegisterDto
                 Email = this.Email,
                 Role = this.Role};
     }
+}
     */
