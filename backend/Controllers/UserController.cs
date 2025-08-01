@@ -94,5 +94,24 @@ public class UserController : ControllerBase
     }
     
     //get users
+    [HttpGet("list-users")]
+    public ActionResult<List<GetUserDto>> ListUsers([FromQuery] string token)
+    {
+        try
+        {
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
+                return BadRequest("You dont have permission to get users");
+            return Ok(_userService.GetUser());
+        }
+        catch (UnauthorizedException unex)
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
     
 }

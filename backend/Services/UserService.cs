@@ -1,4 +1,5 @@
 using MediTrack.DTO;
+using MediTrack.Types;
 
 namespace MediTrack.Services;
 
@@ -50,6 +51,16 @@ public class UserService
                 upUser.IsBanned = updateUserDto.IsBanned.Value;
             db.Users.Update(upUser);
             db.SaveChanges();
+        }
+    }
+
+    public List<GetUserDto> GetUser()
+    {
+        using (var db = new ApplicationContext())
+        {
+            var users = db.Users.ToList();
+            var result = users.Select(u => GetUserDto.FromUser(u)).ToList();
+            return result;
         }
     }
 }
