@@ -41,8 +41,9 @@ public class UserController : ControllerBase
         }
         
     }
+    
     //delete user
-    [HttpPost("delete")]
+    [HttpPost("delete")] // todo: HttpDelete
     public ActionResult Delete([FromQuery] string token, [FromBody]DeleteDto deleteUserDto)
     {
         try
@@ -94,7 +95,7 @@ public class UserController : ControllerBase
     }
     
     //get users
-    [HttpGet("list-users")]
+    [HttpGet("list")]
     public ActionResult<List<GetUserDto>> ListUsers([FromQuery] string token)
     {
         try
