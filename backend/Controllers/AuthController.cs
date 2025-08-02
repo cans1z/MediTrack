@@ -15,6 +15,7 @@ public class AuthController : ControllerBase
     {
         _authService = authService;
     }
+    
     [HttpPost("login")]
     public ActionResult Login([FromBody] LoginDto data)
     {

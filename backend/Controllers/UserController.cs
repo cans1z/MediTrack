@@ -19,10 +19,11 @@ public class UserController : ControllerBase
         _authService = authService;
         _userService = userService;
     }
+    
     //create user
     [HttpPost("register")]
     public ActionResult Register([FromQuery] string token, [FromBody]RegisterDto registerUserDto)
-    {
+    { // todo: RegisterDto переименуй в RegisterUserDto
         try
         {
             var user = _authService.ValidateToken(token);
@@ -43,7 +44,8 @@ public class UserController : ControllerBase
     }
     
     //delete user
-    [HttpPost("delete")] // todo: HttpDelete
+    // todo: передавай id в path: api/users/delete/{userId}
+    [HttpPost("delete")] // todo: HttpDelete !!!!
     public ActionResult Delete([FromQuery] string token, [FromBody]DeleteDto deleteUserDto)
     {
         try
@@ -69,9 +71,9 @@ public class UserController : ControllerBase
     }
     
     //update user
-    [HttpPatch("update")]
+    [HttpPatch("update")] //todo в path передавай id пользователя которого хочешь редактировать
     public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateDto updateUserDto)
-    {
+    { // todo: UpdateDto переименуй в UpdateUserDto
         try
         {
             var user = _authService.ValidateToken(token);
