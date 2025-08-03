@@ -4,7 +4,7 @@ using MediTrack.Types;
 
 namespace MediTrack.DTO;
 
-public class UpdateDto
+public class UpdateUserDto
 {
     [Required]
     public string Email { get; set; } // todo: убери это, в path просто передавай id пользователя

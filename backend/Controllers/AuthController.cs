@@ -1,3 +1,4 @@
+using MediTrack.DTO;
 using MediTrack.Services;
 using MediTrack.Types;
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,7 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("login")]
-    public ActionResult Login([FromBody] LoginDto data)
+    public ActionResult Login([FromBody] LoginUserDto data)
     {
         using var db = new ApplicationContext();
         var user = db.Users.FirstOrDefault(i => i.UserName == data.UserName && i.Password == data.Password);
@@ -60,9 +61,4 @@ public class AuthController : ControllerBase
     
 }
 
-public class LoginDto
-{
-    public string UserName { get; set; }
-    public string Password { get; set; }
-    public string Email { get; set; }
-}
+

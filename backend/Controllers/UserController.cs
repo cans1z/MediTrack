@@ -22,14 +22,14 @@ public class UserController : ControllerBase
     
     //create user
     [HttpPost("register")]
-    public ActionResult Register([FromQuery] string token, [FromBody]RegisterDto registerUserDto)
+    public ActionResult Register([FromQuery] string token, [FromBody]RegisterUserDto registerUserUserDto)
     { // todo: RegisterDto переименуй в RegisterUserDto
         try
         {
             var user = _authService.ValidateToken(token);
             if (user.Role != UserRole.Administrator)
                 return BadRequest("You dont have permission to register this user"); 
-            _userService.RegisterUser(registerUserDto);
+            _userService.RegisterUser(registerUserUserDto);
             return NoContent();
         }
         catch (UnauthorizedException unex)
@@ -45,15 +45,15 @@ public class UserController : ControllerBase
     
     //delete user
     // todo: передавай id в path: api/users/delete/{userId}
-    [HttpPost("delete")] // todo: HttpDelete !!!!
-    public ActionResult Delete([FromQuery] string token, [FromBody]DeleteDto deleteUserDto)
+    [HttpDelete("delete")]
+    public ActionResult Delete([FromRoute] int userId, [FromQuery] string token)
     {
         try
         {
             var user = _authService.ValidateToken(token);
             if (user.Role != UserRole.Administrator)
                 return BadRequest("You dont have permission to delete this user");
-            _userService.DeleteUser(deleteUserDto);
+            _userService.DeleteUser(userId);
             return NoContent();
         }
         catch (UserNotFoundException unfex)
@@ -72,14 +72,14 @@ public class UserController : ControllerBase
     
     //update user
     [HttpPatch("update")] //todo в path передавай id пользователя которого хочешь редактировать
-    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateDto updateUserDto)
-    { // todo: UpdateDto переименуй в UpdateUserDto
+    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateUserDto updateUserUserDto)
+    {
         try
         {
             var user = _authService.ValidateToken(token);
             if (user.Role != UserRole.Administrator)
                 return BadRequest("You dont have permission to update this user");
-            _userService.UpdateUser(updateUserDto);
+            _userService.UpdateUser(updateUserUserDto);
             return NoContent();
         }
         catch (UserNotFoundException unfex)
@@ -98,14 +98,14 @@ public class UserController : ControllerBase
     
     //get users
     [HttpGet("list")]
-    public ActionResult<List<GetUserDto>> ListUsers([FromQuery] string token)
+    public ActionResult<List<User>> ListUsers([FromQuery] string token)
     {
         try
         {
             var user = _authService.ValidateToken(token);
             if (user.Role != UserRole.Administrator)
                 return BadRequest("You dont have permission to get users");
-            return Ok(_userService.GetUser());
+            return Ok(_userService.GetUsers());
         }
         catch (UnauthorizedException unex)
         {

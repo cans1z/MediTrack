@@ -9,7 +9,7 @@ public class UserNotFoundException : Exception
 }
 public class UserService
 {
-    public void RegisterUser(RegisterDto registerUserDto)
+    public void RegisterUser(RegisterUserDto registerUserDto)
     {
         using (var db = new ApplicationContext())
         {
@@ -20,41 +20,41 @@ public class UserService
         } 
     }
 
-    public void DeleteUser(DeleteDto deleteUserDto)
+    public void DeleteUser(int userId)
     {
         using (var db = new ApplicationContext())
         {
-            var delUser = db.Users.FirstOrDefault(u => u.Email == deleteUserDto.Email);
-            if (delUser == null) 
+            var userToDelete = db.Users.FirstOrDefault(u => u.Id == userId);
+            if (userToDelete == null) 
                 throw new UserNotFoundException();
-            db.Users.Remove(delUser);
+            db.Users.Remove(userToDelete);
             db.SaveChanges();
         } 
     }
 
-    public void UpdateUser(UpdateDto updateUserDto)
+    public void UpdateUser(UpdateUserDto updateUserUserDto)
     {
         using (var db = new ApplicationContext())
         {
-            var upUser = db.Users.FirstOrDefault(u => u.Email == updateUserDto.Email);
+            var upUser = db.Users.FirstOrDefault(u => u.Email == updateUserUserDto.Email);
             if (upUser == null)
                 throw new UserNotFoundException();
-            if (!string.IsNullOrWhiteSpace(updateUserDto.NewEmail))
-                upUser.Email = updateUserDto.NewEmail;
-            if (!string.IsNullOrWhiteSpace(updateUserDto.NewPassword))
-                upUser.Password = updateUserDto.NewPassword;
-            if (updateUserDto.NewRole.HasValue)
-                upUser.Role = updateUserDto.NewRole.Value;
-            if (!string.IsNullOrWhiteSpace(updateUserDto.NewName))
-                upUser.UserName = updateUserDto.NewName;
-            if (updateUserDto.IsBanned.HasValue)
-                upUser.IsBanned = updateUserDto.IsBanned.Value;
+            if (!string.IsNullOrWhiteSpace(updateUserUserDto.NewEmail))
+                upUser.Email = updateUserUserDto.NewEmail;
+            if (!string.IsNullOrWhiteSpace(updateUserUserDto.NewPassword))
+                upUser.Password = updateUserUserDto.NewPassword;
+            if (updateUserUserDto.NewRole.HasValue)
+                upUser.Role = updateUserUserDto.NewRole.Value;
+            if (!string.IsNullOrWhiteSpace(updateUserUserDto.NewName))
+                upUser.UserName = updateUserUserDto.NewName;
+            if (updateUserUserDto.IsBanned.HasValue)
+                upUser.IsBanned = updateUserUserDto.IsBanned.Value;
             db.Users.Update(upUser);
             db.SaveChanges();
         }
     }
 
-    public List<GetUserDto> GetUser()
+    public List<GetUserDto> GetUsers()
     {
         using (var db = new ApplicationContext())
         {
