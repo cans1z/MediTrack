@@ -20,15 +20,58 @@ public class UserController : ControllerBase
         _userService = userService;
     }
     
+    //get users
+    [HttpGet("list")]
+    public ActionResult<List<User>> ListUsers([FromQuery] string token)
+    {
+        try
+        {
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            return Ok(_userService.GetUsers());
+        }
+        catch (UnauthorizedException unex)
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    //get user by id
+    [HttpGet("{userId}")]
+    public ActionResult<User> GetUser([FromQuery] string token, [FromRoute] int userId)
+    {
+        try
+        {
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            return Ok(_userService.GetUser(userId));
+        }
+        catch (MedicationNotFoundException mnfex)
+        {
+            return NotFound(mnfex.Message);
+        }
+        catch (UnauthorizedException unex)
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
     //create user
     [HttpPost("register")]
     public ActionResult Register([FromQuery] string token, [FromBody]RegisterUserDto registerUserUserDto)
-    { // todo: RegisterDto переименуй в RegisterUserDto
+    {
         try
         {
-            var user = _authService.ValidateToken(token);
-            if (user.Role != UserRole.Administrator)
-                return BadRequest("You dont have permission to register this user"); 
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
             _userService.RegisterUser(registerUserUserDto);
             return NoContent();
         }
@@ -44,15 +87,13 @@ public class UserController : ControllerBase
     }
     
     //delete user
-    // todo: передавай id в path: api/users/delete/{userId}
-    [HttpDelete("delete")]
+    [HttpDelete("delete/{userId}")]
     public ActionResult Delete([FromRoute] int userId, [FromQuery] string token)
     {
         try
         {
-            var user = _authService.ValidateToken(token);
-            if (user.Role != UserRole.Administrator)
-                return BadRequest("You dont have permission to delete this user");
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
             _userService.DeleteUser(userId);
             return NoContent();
         }
@@ -71,15 +112,14 @@ public class UserController : ControllerBase
     }
     
     //update user
-    [HttpPatch("update")] //todo в path передавай id пользователя которого хочешь редактировать
-    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateUserDto updateUserUserDto)
+    [HttpPatch("update/{userId}")]
+    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateUserDto updateUserUserDto, [FromRoute] int userId)
     {
         try
         {
-            var user = _authService.ValidateToken(token);
-            if (user.Role != UserRole.Administrator)
-                return BadRequest("You dont have permission to update this user");
-            _userService.UpdateUser(updateUserUserDto);
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            _userService.UpdateUser(updateUserUserDto, userId);
             return NoContent();
         }
         catch (UserNotFoundException unfex)
@@ -95,26 +135,4 @@ public class UserController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-    
-    //get users
-    [HttpGet("list")]
-    public ActionResult<List<User>> ListUsers([FromQuery] string token)
-    {
-        try
-        {
-            var user = _authService.ValidateToken(token);
-            if (user.Role != UserRole.Administrator)
-                return BadRequest("You dont have permission to get users");
-            return Ok(_userService.GetUsers());
-        }
-        catch (UnauthorizedException unex)
-        {
-            return Unauthorized(unex.Message);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-    
 }

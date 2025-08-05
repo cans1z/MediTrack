@@ -24,6 +24,28 @@ public class AuthService
             return session.User;
         }
     }
+    public bool TryValidateAdmin(string token, out User user, out string? errorMessage)
+    {
+        try
+        {
+            user = ValidateToken(token);
+
+            if (user.Role != UserRole.Administrator)
+            {
+                errorMessage = "You don't have permission to perform this action.";
+                return false;
+            }
+
+            errorMessage = null;
+            return true;
+        }
+        catch (UnauthorizedException ex)
+        {
+            user = null!;
+            errorMessage = ex.Message;
+            return false;
+        }
+    }
     
     
     

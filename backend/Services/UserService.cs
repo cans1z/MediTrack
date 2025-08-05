@@ -16,7 +16,6 @@ public class UserService
             var newUser = registerUserDto.CreateUser();
             db.Users.Add(newUser);
             db.SaveChanges();
-                
         } 
     }
 
@@ -32,21 +31,21 @@ public class UserService
         } 
     }
 
-    public void UpdateUser(UpdateUserDto updateUserUserDto)
+    public void UpdateUser(UpdateUserDto updateUserUserDto, int userId)
     {
         using (var db = new ApplicationContext())
         {
-            var upUser = db.Users.FirstOrDefault(u => u.Email == updateUserUserDto.Email);
+            var upUser = db.Users.FirstOrDefault(u => u.Id == userId);
             if (upUser == null)
                 throw new UserNotFoundException();
-            if (!string.IsNullOrWhiteSpace(updateUserUserDto.NewEmail))
-                upUser.Email = updateUserUserDto.NewEmail;
-            if (!string.IsNullOrWhiteSpace(updateUserUserDto.NewPassword))
-                upUser.Password = updateUserUserDto.NewPassword;
-            if (updateUserUserDto.NewRole.HasValue)
-                upUser.Role = updateUserUserDto.NewRole.Value;
-            if (!string.IsNullOrWhiteSpace(updateUserUserDto.NewName))
-                upUser.UserName = updateUserUserDto.NewName;
+            if (!string.IsNullOrWhiteSpace(updateUserUserDto.Email))
+                upUser.Email = updateUserUserDto.Email;
+            if (!string.IsNullOrWhiteSpace(updateUserUserDto.Password))
+                upUser.Password = updateUserUserDto.Password;
+            if (updateUserUserDto.Role.HasValue)
+                upUser.Role = updateUserUserDto.Role.Value;
+            if (!string.IsNullOrWhiteSpace(updateUserUserDto.Name))
+                upUser.UserName = updateUserUserDto.Name;
             if (updateUserUserDto.IsBanned.HasValue)
                 upUser.IsBanned = updateUserUserDto.IsBanned.Value;
             db.Users.Update(upUser);
@@ -61,6 +60,16 @@ public class UserService
             var users = db.Users.ToList();
             var result = users.Select(u => GetUserDto.FromUser(u)).ToList();
             return result;
+        }
+    }
+    public User GetUser(int userId)
+    {
+        using (var db = new ApplicationContext())
+        {
+            var user = db.Users.FirstOrDefault(x => x.Id == userId);
+            if (user == null)
+                throw new MedicationNotFoundException();
+            return user;
         }
     }
 }

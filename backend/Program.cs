@@ -21,6 +21,8 @@ namespace MediTrack
             });
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<UserService>();
+            builder.Services.AddSingleton<MedicationService>();
+
 
             var app = builder.Build();
 

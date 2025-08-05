@@ -11,11 +11,14 @@ namespace MediTrack.Controllers;
 public class MedicationControler : ControllerBase
 {
     private readonly AuthService _authService;
+    private readonly MedicationService _medicationService;
 
-    public MedicationControler(AuthService authService)
+    public MedicationControler(AuthService authService, MedicationService medicationService)
     {
         _authService = authService;
+        _medicationService = medicationService;
     }
+
     
     //get medications
     [HttpGet("list")]
@@ -23,41 +26,10 @@ public class MedicationControler : ControllerBase
     {
         try
         {
-            var user = _authService.ValidateToken(token);
-            if (user.Role != UserRole.Administrator)
-                return BadRequest("You dont have permission to get users");
-            using (var db = new ApplicationContext())
-            {
-                var medications = db.Medications.ToList();
-                return Ok(medications);
-            }
-        }
-        catch (UnauthorizedException unex)
-        {
-            return Unauthorized(unex.Message);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-    //get medication by id
-    [HttpPost("add")]
-    public ActionResult Add([FromQuery] string token, [FromBody] AddMedicationDto medicationDto)
-    {
-        try
-        {
-            var user = _authService.ValidateToken(token);
-            if (user.Role != UserRole.Administrator)
-                return BadRequest("You dont have permission to get users");
-            using (var db = new ApplicationContext())
-            {
-                var newMedication = medicationDto.CreateMedication();
-                db.Medications.Add(newMedication);
-                db.SaveChanges();
-            }
-
-            return NoContent();
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            return Ok(_medicationService.GetMedications());
+            //todo move to medication service
         }
         catch (UnauthorizedException unex)
         {
@@ -69,4 +41,100 @@ public class MedicationControler : ControllerBase
         }
     }
     
+    
+    //get medication by id
+    [HttpGet("{medicationId}")]
+    public ActionResult<Medication> GetMedication([FromQuery] string token, [FromRoute] int medicationId)
+    {
+        try
+        {
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            return Ok(_medicationService.GetMedication(medicationId));
+        }
+        catch (MedicationNotFoundException mnfex)
+        {
+            return NotFound(mnfex.Message);
+        }
+        catch (UnauthorizedException unex)
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    //add medication
+    [HttpPost("add")]
+    public ActionResult Add([FromQuery] string token, [FromBody] AddMedicationDto addMedicationDto)
+    {
+        try
+        {
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            _medicationService.AddMedication(addMedicationDto);
+            return NoContent();
+        }
+        catch (UnauthorizedException unex) 
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    //delete medication
+    [HttpDelete("delete/{medicationId}")]
+    public ActionResult Delete([FromQuery] string token, [FromRoute] int medicationId)
+    {
+        try
+        {
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            _medicationService.DeleteMedication(medicationId);
+            return NoContent();
+        }
+        catch (MedicationNotFoundException mnfex)
+        {
+            return NotFound(mnfex.Message);
+        }
+        catch (UnauthorizedException unex) 
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    //update medication
+    [HttpPatch("update/{medicationId}")]
+    public ActionResult UpdateMedication([FromQuery] string token, [FromBody] UpdateMedicationDto updateMedicationDto,
+        [FromRoute] int medicationId)
+    {
+        try
+        {
+            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
+                return Unauthorized(errorMsg);
+            _medicationService.UpdateMedication(updateMedicationDto, medicationId);
+            return NoContent();
+        }
+        catch (MedicationNotFoundException mnfex)
+        {
+            return NotFound(mnfex.Message);
+        }
+        catch (UnauthorizedException unex)
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
 }
