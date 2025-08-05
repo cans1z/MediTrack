@@ -1,4 +1,5 @@
 using MediTrack.DTO;
+using MediTrack.Extensions;
 using MediTrack.Services;
 using MediTrack.Types;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -22,12 +23,13 @@ public class MedicationControler : ControllerBase
     
     //get medications
     [HttpGet("list")]
-    public ActionResult<List<Medication>> GetMedicatons([FromQuery] string token)
+    public ActionResult<List<Medication>> GetMedicatons()
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             return Ok(_medicationService.GetMedications());
             //todo move to medication service
         }
@@ -44,12 +46,12 @@ public class MedicationControler : ControllerBase
     
     //get medication by id
     [HttpGet("{medicationId}")]
-    public ActionResult<Medication> GetMedication([FromQuery] string token, [FromRoute] int medicationId)
+    public ActionResult<Medication> GetMedication([FromRoute] int medicationId)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
             return Ok(_medicationService.GetMedication(medicationId));
         }
         catch (MedicationNotFoundException mnfex)
@@ -68,12 +70,12 @@ public class MedicationControler : ControllerBase
     
     //add medication
     [HttpPost("add")]
-    public ActionResult Add([FromQuery] string token, [FromBody] AddMedicationDto addMedicationDto)
+    public ActionResult Add([FromBody] AddMedicationDto addMedicationDto)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
             _medicationService.AddMedication(addMedicationDto);
             return NoContent();
         }
@@ -89,13 +91,15 @@ public class MedicationControler : ControllerBase
     
     //delete medication
     [HttpDelete("delete/{medicationId}")]
-    public ActionResult Delete([FromQuery] string token, [FromRoute] int medicationId)
+    public ActionResult Delete([FromRoute] int medicationId)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+            
             _medicationService.DeleteMedication(medicationId);
+            
             return NoContent();
         }
         catch (MedicationNotFoundException mnfex)
@@ -114,13 +118,14 @@ public class MedicationControler : ControllerBase
     
     //update medication
     [HttpPatch("update/{medicationId}")]
-    public ActionResult UpdateMedication([FromQuery] string token, [FromBody] UpdateMedicationDto updateMedicationDto,
+    public ActionResult UpdateMedication([FromBody] UpdateMedicationDto updateMedicationDto,
         [FromRoute] int medicationId)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             _medicationService.UpdateMedication(updateMedicationDto, medicationId);
             return NoContent();
         }

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MediTrack.DTO;
+using MediTrack.Extensions;
 using MediTrack.Services;
 using MediTrack.Types;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -22,12 +23,13 @@ public class UserController : ControllerBase
     
     //get users
     [HttpGet("list")]
-    public ActionResult<List<User>> ListUsers([FromQuery] string token)
+    public ActionResult<List<User>> ListUsers()
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             return Ok(_userService.GetUsers());
         }
         catch (UnauthorizedException unex)
@@ -42,12 +44,13 @@ public class UserController : ControllerBase
     
     //get user by id
     [HttpGet("{userId}")]
-    public ActionResult<User> GetUser([FromQuery] string token, [FromRoute] int userId)
+    public ActionResult<User> GetUser([FromRoute] int userId)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             return Ok(_userService.GetUser(userId));
         }
         catch (MedicationNotFoundException mnfex)
@@ -66,12 +69,13 @@ public class UserController : ControllerBase
     
     //create user
     [HttpPost("register")]
-    public ActionResult Register([FromQuery] string token, [FromBody]RegisterUserDto registerUserUserDto)
+    public ActionResult Register([FromBody]RegisterUserDto registerUserUserDto)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             _userService.RegisterUser(registerUserUserDto);
             return NoContent();
         }
@@ -88,12 +92,13 @@ public class UserController : ControllerBase
     
     //delete user
     [HttpDelete("delete/{userId}")]
-    public ActionResult Delete([FromRoute] int userId, [FromQuery] string token)
+    public ActionResult Delete([FromRoute] int userId)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             _userService.DeleteUser(userId);
             return NoContent();
         }
@@ -113,12 +118,13 @@ public class UserController : ControllerBase
     
     //update user
     [HttpPatch("update/{userId}")]
-    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateUserDto updateUserUserDto, [FromRoute] int userId)
+    public ActionResult UpdateUser([FromBody] UpdateUserDto updateUserUserDto, [FromRoute] int userId)
     {
         try
         {
-            if (!_authService.TryValidateAdmin(token, out _, out var errorMsg))
-                return Unauthorized(errorMsg);
+            if (!HttpContext.IsAdmin(_authService, out _))
+                return Unauthorized("Admin access required.");
+
             _userService.UpdateUser(updateUserUserDto, userId);
             return NoContent();
         }
