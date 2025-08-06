@@ -20,26 +20,21 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public ActionResult Login([FromBody] LoginUserDto data)
     {
-        using var db = new ApplicationContext();
-        var user = db.Users.FirstOrDefault(i => i.UserName == data.UserName && i.Password == data.Password);
-        if (user == null || user.IsBanned) return Unauthorized();
-
-        var oldSessions = db.Sessions.Where(s => s.UserId == user.Id && s.IsActive);
-        foreach (var s in oldSessions) s.IsActive = false;
-
-        var newSession = new Session
+        try
         {
-            UserId = user.Id,
-            Token = Guid.NewGuid().ToString(),
-            IsActive = true,
-            AuthDate = DateTime.UtcNow
-        };
-
-        db.Sessions.Add(newSession);
-        db.SaveChanges();
-
-        return Ok(new { token = newSession.Token });
+            var token = _authService.Login(data.UserName, data.Password);
+            return Ok(new { token });
+        }
+        catch (UnauthorizedException)
+        {
+            return Unauthorized("Invalid credentials or banned account.");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
+
 
     [HttpGet("fetch")]
     public ActionResult FetchProfile(string token)
