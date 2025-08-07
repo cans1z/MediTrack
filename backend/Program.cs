@@ -54,7 +54,9 @@ namespace MediTrack
             // Register custom services
             builder.Services.AddSingleton<AuthService>();
             builder.Services.AddSingleton<UserService>();
+            builder.Services.AddSingleton<PrescriptionService>();
             builder.Services.AddSingleton<MedicationService>();
+            builder.Services.AddSingleton<IntakeService>();
 
             var app = builder.Build();
 

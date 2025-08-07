@@ -7,12 +7,13 @@ public class PrescriptionService
 {
     public List<Prescription> GetPrescriptionsByPatient(int patientId)
     {
-        using (var db = new ApplicationContext())
-        {
-            var prescriptions = db.Prescriptions.Where(x => x.Id == patientId).ToList();
-            return prescriptions;   
-        }
+        using var db = new ApplicationContext();
+
+        return db.Prescriptions
+            .Where(p => p.PatientId == patientId)
+            .ToList();
     }
+
     
     public void AddPrescription(AddPrescriptionDto dto, User doctor)
     {
@@ -34,7 +35,7 @@ public class PrescriptionService
             StartDate = dto.StartDate,
             Period = dto.Period,
             IsFlexible = dto.IsFlexible,
-            Comment = dto.Comment
+            Comment = dto.Comment ?? string.Empty,
         };
 
         db.Prescriptions.Add(prescription);

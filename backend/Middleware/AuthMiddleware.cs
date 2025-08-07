@@ -14,10 +14,12 @@ public class AuthMiddleware
 
     public async Task Invoke(HttpContext context, AuthService authService)
     {
-        var token = context.Request.Query["token"].FirstOrDefault();
+        var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
 
-        if (!string.IsNullOrWhiteSpace(token))
+        if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer "))
         {
+            var token = authHeader.Substring("Bearer ".Length).Trim();
+
             try
             {
                 var user = authService.ValidateToken(token);

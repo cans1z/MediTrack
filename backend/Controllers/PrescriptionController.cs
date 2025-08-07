@@ -1,4 +1,6 @@
+using MediTrack.DTO;
 using MediTrack.Services;
+using MediTrack.Types;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MediTrack.Controllers;
@@ -16,43 +18,39 @@ public class PrescriptionController : ControllerBase
         _prescriptionService = prescriptionService;
     }
     
-    //get prescriptions
+    //add prescriptions
     [HttpPost("add")]
-    public ActionResult AddPrescription([FromHeader(Name = "Authentication")] string token, [FromBody] AddPrescriptionDto dto)
+    public ActionResult AddPrescription([FromBody] AddPrescriptionDto dto)
     {
-        if (!_authService.TryValidateDoctor(token, out var doctor, out var errorMessage))
-            return Unauthorized(errorMessage);
+        var user = HttpContext.Items["User"] as User;
+        if (user == null) return Unauthorized();
+        if (user.Role != UserRole.Doctor) return BadRequest("You don't have permission to access this resource.");
 
         try
         {
-            var prescription = _prescriptionService.AddPrescription(dto, doctor);
-            return Ok(prescription);
+            _prescriptionService.AddPrescription(dto, user);
+            return Ok(new { message = "Prescription added successfully" });
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { error = ex.Message });
         }
     }
 
-    [HttpGet("by-patient/{patientId}")]
-    public ActionResult GetPrescriptionsForPatient([FromHeader(Name = "Authentication")] string token, int patientId)
+    [HttpGet("list/{patientId}")]
+    public ActionResult GetPrescriptionsByPatient(int patientId)
     {
-        if (!_authService.TryValidateToken(token, out var user, out var errorMessage))
-            return Unauthorized(errorMessage);
+        var user = HttpContext.Items["User"] as User;
+        if (user == null) return Unauthorized();
 
-        // Врач видит всех, пациент — только свои
-        if (user.Role == UserRole.Patient && user.Id != patientId)
-            return Forbid();
+        if (user.Role != UserRole.Doctor || user.Id != patientId)
+        {
+            return BadRequest("You don't have permission to access this resource.");
+        }
 
-        try
-        {
-            var prescriptions = _prescriptionService.GetPrescriptionsForPatient(patientId);
-            return Ok(prescriptions);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var prescriptions = _prescriptionService.GetPrescriptionsByPatient(patientId);
+        return Ok(prescriptions);
     }
+
     
 }

@@ -9,5 +9,5 @@ public class AddPrescriptionDto
     public DateTime StartDate { get; set; }
     public int Period { get; set; }
     public bool IsFlexible { get; set; }    
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 }

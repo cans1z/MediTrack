@@ -31,7 +31,6 @@ public class MedicationControler : ControllerBase
                 return Unauthorized("Admin access required.");
 
             return Ok(_medicationService.GetMedications());
-            //todo move to medication service
         }
         catch (UnauthorizedException unex)
         {
