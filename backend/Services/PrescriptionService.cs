@@ -18,7 +18,7 @@ public class PrescriptionService
     public void AddPrescription(AddPrescriptionDto dto, User doctor)
     {
         using var db = new ApplicationContext();
-
+// todo: проверяй чтобы в patientId был айди только пациента
         var patient = db.Users.FirstOrDefault(u => u.Id == dto.PatientId && u.Role == UserRole.Patient);
         if (patient == null) throw new Exception("Patient not found");
 

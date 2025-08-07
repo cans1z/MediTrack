@@ -23,11 +23,12 @@ public class UserController : ControllerBase
     
     //get users
     [HttpGet("list")]
-    public ActionResult<List<User>> ListUsers()
+    public ActionResult<List<User>> ListUsers([FromQuery] string token)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             return Ok(_userService.GetUsers());
@@ -44,11 +45,12 @@ public class UserController : ControllerBase
     
     //get user by id
     [HttpGet("{userId}")]
-    public ActionResult<User> GetUser([FromRoute] int userId)
+    public ActionResult<User> GetUser([FromQuery] string token, [FromRoute] int userId)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             return Ok(_userService.GetUser(userId));
@@ -69,11 +71,12 @@ public class UserController : ControllerBase
     
     //create user
     [HttpPost("register")]
-    public ActionResult Register([FromBody]RegisterUserDto registerUserUserDto)
+    public ActionResult Register([FromQuery] string token, [FromBody]RegisterUserDto registerUserUserDto)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             _userService.RegisterUser(registerUserUserDto);
@@ -92,11 +95,12 @@ public class UserController : ControllerBase
     
     //delete user
     [HttpDelete("delete/{userId}")]
-    public ActionResult Delete([FromRoute] int userId)
+    public ActionResult Delete([FromQuery] string token, [FromRoute] int userId)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             _userService.DeleteUser(userId);
@@ -118,11 +122,12 @@ public class UserController : ControllerBase
     
     //update user
     [HttpPatch("update/{userId}")]
-    public ActionResult UpdateUser([FromBody] UpdateUserDto updateUserUserDto, [FromRoute] int userId)
+    public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateUserDto updateUserUserDto, [FromRoute] int userId)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             _userService.UpdateUser(updateUserUserDto, userId);

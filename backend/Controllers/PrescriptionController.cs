@@ -20,15 +20,17 @@ public class PrescriptionController : ControllerBase
     
     //add prescriptions
     [HttpPost("add")]
-    public ActionResult AddPrescription([FromBody] AddPrescriptionDto dto)
+    public ActionResult AddPrescription([FromQuery] string token, [FromBody] AddPrescriptionDto dto)
     {
-        var user = HttpContext.Items["User"] as User;
-        if (user == null) return Unauthorized();
-        if (user.Role != UserRole.Doctor) return BadRequest("You don't have permission to access this resource.");
-
+        var user = _authService.ValidateToken(token);
+        if (user.Role == UserRole.Patient) // todo тут сам реши какие роли это могут
+            return Unauthorized("Admin access required.");
+        
         try
         {
             _prescriptionService.AddPrescription(dto, user);
+            
+            // todo: NO COntent
             return Ok(new { message = "Prescription added successfully" });
         }
         catch (Exception ex)
@@ -37,16 +39,14 @@ public class PrescriptionController : ControllerBase
         }
     }
 
+    // todo: проверяй чтобы в patientId был айди только пациента
     [HttpGet("list/{patientId}")]
-    public ActionResult GetPrescriptionsByPatient(int patientId)
+    public ActionResult GetPrescriptionsByPatient([FromQuery] string token, int patientId)
     {
-        var user = HttpContext.Items["User"] as User;
-        if (user == null) return Unauthorized();
-
-        if (user.Role != UserRole.Doctor || user.Id != patientId)
-        {
-            return BadRequest("You don't have permission to access this resource.");
-        }
+        
+        var user = _authService.ValidateToken(token);
+        if (user.Role == UserRole.Patient) // todo тут сам реши какие роли это могут
+            return Unauthorized("Admin access required.");
 
         var prescriptions = _prescriptionService.GetPrescriptionsByPatient(patientId);
         return Ok(prescriptions);

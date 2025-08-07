@@ -12,7 +12,6 @@ public class UnauthorizedException : Exception
 
 public class AuthService
 {
-    
     public string Login(string username, string password)
     {
         using var db = new ApplicationContext();

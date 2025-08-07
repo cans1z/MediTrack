@@ -20,12 +20,12 @@ public class IntakeController : ControllerBase
     }
     
     //get intakes
-    [HttpGet("list")]
-    public ActionResult<List<IntakeRecord>> GetIntakeRecords([FromRoute] int prescriptionId)
+    [HttpGet("list/{prescriptionId}")]
+    public ActionResult<List<IntakeRecord>> GetIntakeRecords([FromQuery] string token, [FromRoute] int prescriptionId)
     {
         try
         {
-            var user = HttpContext.GetUser(_authService);
+            var user = _authService.ValidateToken(token);
             return Ok(_intakeService.GetIntakeRecords(prescriptionId, user));
         }
         catch (UnauthorizedException unex)
@@ -39,13 +39,14 @@ public class IntakeController : ControllerBase
     }
     
     //add intakes
-    [HttpPost("create")]
-    public ActionResult CreateIntakeRecord([FromBody] AddIntakeDto addIntakeDto)
+    // todo, prescriptionId передавай не в ДТО а в роуте
+    [HttpPut("create/{prescriptionId}")] // пока в Query)))
+    public ActionResult CreateIntakeRecord(int prescriptionId, [FromQuery] string token, [FromBody] AddIntakeDto addIntakeDto)
     {
         try
         {
-             var user = HttpContext.GetUser(_authService);
-            _intakeService.AddIntakeRecord(addIntakeDto, user);
+            var user = _authService.ValidateToken(token);
+            _intakeService.AddIntakeRecord(addIntakeDto, user, prescriptionId);
             return NoContent();
         }
         catch (UnauthorizedException unex) 

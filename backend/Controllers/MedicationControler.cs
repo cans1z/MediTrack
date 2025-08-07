@@ -23,11 +23,12 @@ public class MedicationControler : ControllerBase
     
     //get medications
     [HttpGet("list")]
-    public ActionResult<List<Medication>> GetMedicatons()
+    public ActionResult<List<Medication>> GetMedicatons([FromQuery] string token)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             return Ok(_medicationService.GetMedications());
@@ -45,11 +46,12 @@ public class MedicationControler : ControllerBase
     
     //get medication by id
     [HttpGet("{medicationId}")]
-    public ActionResult<Medication> GetMedication([FromRoute] int medicationId)
+    public ActionResult<Medication> GetMedication([FromQuery] string token, [FromRoute] int medicationId)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
             return Ok(_medicationService.GetMedication(medicationId));
         }
@@ -69,11 +71,12 @@ public class MedicationControler : ControllerBase
     
     //add medication
     [HttpPost("add")]
-    public ActionResult Add([FromBody] AddMedicationDto addMedicationDto)
+    public ActionResult Add([FromQuery] string token, [FromBody] AddMedicationDto addMedicationDto)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
             _medicationService.AddMedication(addMedicationDto);
             return NoContent();
@@ -90,11 +93,12 @@ public class MedicationControler : ControllerBase
     
     //delete medication
     [HttpDelete("delete/{medicationId}")]
-    public ActionResult Delete([FromRoute] int medicationId)
+    public ActionResult Delete([FromQuery] string token, int medicationId)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
             
             _medicationService.DeleteMedication(medicationId);
@@ -117,12 +121,13 @@ public class MedicationControler : ControllerBase
     
     //update medication
     [HttpPatch("update/{medicationId}")]
-    public ActionResult UpdateMedication([FromBody] UpdateMedicationDto updateMedicationDto,
+    public ActionResult UpdateMedication([FromQuery] string token, [FromBody] UpdateMedicationDto updateMedicationDto,
         [FromRoute] int medicationId)
     {
         try
         {
-            if (!HttpContext.IsAdmin(_authService, out _))
+            var user = _authService.ValidateToken(token);
+            if (user.Role != UserRole.Administrator)
                 return Unauthorized("Admin access required.");
 
             _medicationService.UpdateMedication(updateMedicationDto, medicationId);

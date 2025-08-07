@@ -14,6 +14,11 @@ public class ApplicationContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=meditrack.db");
+        // optionsBuilder.UseSqlite("Data Source=meditrack.db");
+        optionsBuilder.UseNpgsql($"Host=localhost;" +
+                                 $"Port=5432;" +
+                                 $"Database=kekserv;" +
+                                 $"Username=postgres;" +
+                                 $"Password=1234");
     }
 }

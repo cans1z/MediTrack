@@ -12,9 +12,10 @@ public class IntakeService
         using (var db = new ApplicationContext())
         {
             var prescription = db.Prescriptions
+                .Where(p => p.Id == prescriptionId)
                 .Include(p => p.Patient)
                 .Include(p => p.Doctor)
-                .FirstOrDefault(p => p.Id == prescriptionId);
+                .FirstOrDefault();
             
             if (prescription == null)
                 throw new Exception("Prescription not found");
@@ -30,54 +31,56 @@ public class IntakeService
     }
 
     //add intake record
-    public void AddIntakeRecord(AddIntakeDto dto, User user)
+    public void AddIntakeRecord(AddIntakeDto dto, User user, int prescriptionId)
     {
         using (var db = new ApplicationContext())
         {
             var prescription = db.Prescriptions
                 .Include(p => p.Patient)
                 .Include(p => p.Doctor)
-                .FirstOrDefault(p => p.Id == dto.PrescriptionId);
-            if(user.Id != prescription.DoctorId &&
-               !(user.Id == prescription.PatientId && prescription.IsFlexible))
-            {
+                .FirstOrDefault(p => p.Id == prescriptionId);
+            
+            if (user.Id != prescription.DoctorId && !(user.Id == prescription.PatientId && prescription.IsFlexible))
                 throw new Exception("You are not allowed to modify this intake record");
-            }
+            
             var newPrescription = dto.CreateIntakeRecord();
+            newPrescription.PrescriptionId = prescriptionId;
             db.IntakeRecords.Add(newPrescription);
             db.SaveChanges();
         }
     }
     
     //update intake record
-    public void UpdateIntakeRecord(AddIntakeDto dto, User user)
-    {
-        using (var db = new ApplicationContext())
-        {
-            var prescription = db.Prescriptions
-                .Include(p => p.Patient)
-                .Include(p => p.Doctor)
-                .FirstOrDefault(p => p.Id == dto.PrescriptionId);
-            if(user.Id != prescription.DoctorId &&
-               !(user.Id == prescription.PatientId && prescription.IsFlexible))
-            {
-                throw new Exception("You are not allowed to modify this intake record");
-            }
-            
-            var existingIntake = db.IntakeRecords.FirstOrDefault(r => 
-                r.PrescriptionId == dto.PrescriptionId && r.DateTaken == dto.DateTaken);
-            if (existingIntake != null)
-            {
-                existingIntake.Status = dto.Status;
-                existingIntake.Comment = dto.Comment ?? string.Empty;
-            }
-            else
-            {
-                throw new Exception("There is no such intake record");
-            }
-
-            db.SaveChanges();
-        }
-    }
+    // todo: переделай, если хочешь обновление учета приема медикамента - обновляй по id
+    // public void UpdateIntakeRecord(AddIntakeDto dto, User user, int prescriptionId)
+    // {
+    //     using (var db = new ApplicationContext())
+    //     {
+    //         var prescription = db.Prescriptions
+    //             .Include(p => p.Patient)
+    //             .Include(p => p.Doctor)
+    //             .FirstOrDefault(p => p.Id == prescriptionId);
+    //         
+    //         if(user.Id != prescription.DoctorId &&
+    //            !(user.Id == prescription.PatientId && prescription.IsFlexible))
+    //         {
+    //             throw new Exception("You are not allowed to modify this intake record");
+    //         }
+    //         
+    //         var existingIntake = db.IntakeRecords.FirstOrDefault(r => 
+    //             r.PrescriptionId == dto.PrescriptionId && r.DateTaken == dto.DateTaken);
+    //         if (existingIntake != null)
+    //         {
+    //             existingIntake.Status = dto.Status;
+    //             existingIntake.Comment = dto.Comment ?? string.Empty;
+    //         }
+    //         else
+    //         {
+    //             throw new Exception("There is no such intake record");
+    //         }
+    //
+    //         db.SaveChanges();
+    //     }
+    // }
     
 }

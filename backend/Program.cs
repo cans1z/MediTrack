@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using MediTrack.Middleware;
 using MediTrack.Services;
 using Microsoft.OpenApi.Models;
 
@@ -20,36 +19,7 @@ namespace MediTrack
 
             // Swagger setup
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(options =>
-            {
-                options.UseInlineDefinitionsForEnums();
-
-                // Add Bearer token support
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Введите токен в формате: Bearer {token}"
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
-            });
+            builder.Services.AddSwaggerGen();
 
             // Register custom services
             builder.Services.AddSingleton<AuthService>();
@@ -68,7 +38,6 @@ namespace MediTrack
             }
 
             // app.UseHttpsRedirection(); // Optional
-            app.UseMiddleware<AuthMiddleware>();
             app.UseAuthorization();
 
             app.MapControllers();
