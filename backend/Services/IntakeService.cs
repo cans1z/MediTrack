@@ -39,9 +39,8 @@ public class IntakeService
                 .Include(p => p.Patient)
                 .Include(p => p.Doctor)
                 .FirstOrDefault(p => p.Id == prescriptionId);
-            
             if (user.Id != prescription.DoctorId && !(user.Id == prescription.PatientId && prescription.IsFlexible))
-                throw new Exception("You are not allowed to modify this intake record");
+                throw new Exception("You are not allowed to create intake record");
             
             var newPrescription = dto.CreateIntakeRecord();
             newPrescription.PrescriptionId = prescriptionId;
@@ -52,35 +51,43 @@ public class IntakeService
     
     //update intake record
     // todo: переделай, если хочешь обновление учета приема медикамента - обновляй по id
-    // public void UpdateIntakeRecord(AddIntakeDto dto, User user, int prescriptionId)
-    // {
-    //     using (var db = new ApplicationContext())
-    //     {
-    //         var prescription = db.Prescriptions
-    //             .Include(p => p.Patient)
-    //             .Include(p => p.Doctor)
-    //             .FirstOrDefault(p => p.Id == prescriptionId);
-    //         
-    //         if(user.Id != prescription.DoctorId &&
-    //            !(user.Id == prescription.PatientId && prescription.IsFlexible))
-    //         {
-    //             throw new Exception("You are not allowed to modify this intake record");
-    //         }
-    //         
-    //         var existingIntake = db.IntakeRecords.FirstOrDefault(r => 
-    //             r.PrescriptionId == dto.PrescriptionId && r.DateTaken == dto.DateTaken);
-    //         if (existingIntake != null)
-    //         {
-    //             existingIntake.Status = dto.Status;
-    //             existingIntake.Comment = dto.Comment ?? string.Empty;
-    //         }
-    //         else
-    //         {
-    //             throw new Exception("There is no such intake record");
-    //         }
-    //
-    //         db.SaveChanges();
-    //     }
-    // }
+     public void UpdateIntakeRecord(int intakeId, UpdateIntakeDto updateIntakeDto, User user, int prescriptionId)
+     {
+         using (var db = new ApplicationContext())
+         {
+             var prescription = db.Prescriptions
+                 .Include(p => p.Patient)
+                 .Include(p => p.Doctor)
+                 .FirstOrDefault(p => p.Id == prescriptionId);
+            
+             if (user.Id != prescription.DoctorId && !(user.Id == prescription.PatientId && prescription.IsFlexible))
+                 throw new Exception("You are not allowed to modify this intake record");
+             
+             var upIntakeRecord = db.IntakeRecords.Find(intakeId);
+             if(upIntakeRecord == null)
+                 throw new Exception("Intake record not found");
+             if(upIntakeRecord.PrescriptionId != prescriptionId)
+                 upIntakeRecord.PrescriptionId = prescriptionId;
+             if (!string.IsNullOrWhiteSpace(updateIntakeDto.Comment))
+                 upIntakeRecord.Comment = updateIntakeDto.Comment;
+             if (!string.IsNullOrWhiteSpace(updateIntakeDto.Status))
+                 upIntakeRecord.Status = updateIntakeDto.Status;
+             /*if (updatePrescriptionDto.StartDate.HasValue)
+                 upPrescription.StartDate = updatePrescriptionDto.StartDate;*/
+             db.IntakeRecords.Update(upIntakeRecord);
+             db.SaveChanges();
+         }
+     }
+     
+     //delete intake
+     public void DeleteIntakeRecord(int intakeId)
+     {
+         using var db = new ApplicationContext();
+         var intake = db.IntakeRecords.Find(intakeId);
+         if (intake == null)
+             throw new Exception("Intake record not found");
+         db.IntakeRecords.Remove(intake);
+         db.SaveChanges();
+     }
     
 }

@@ -41,12 +41,52 @@ public class IntakeController : ControllerBase
     //add intakes
     // todo, prescriptionId передавай не в ДТО а в роуте
     [HttpPut("create/{prescriptionId}")] // пока в Query)))
-    public ActionResult CreateIntakeRecord(int prescriptionId, [FromQuery] string token, [FromBody] AddIntakeDto addIntakeDto)
+    public ActionResult AddIntakeRecord([FromQuery] string token, int prescriptionId,  [FromBody] AddIntakeDto addIntakeDto)
     {
         try
         {
             var user = _authService.ValidateToken(token);
             _intakeService.AddIntakeRecord(addIntakeDto, user, prescriptionId);
+            return NoContent();
+        }
+        catch (UnauthorizedException unex) 
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    //update intakes
+    [HttpPatch("update/{intakeId}")]
+    public ActionResult UpdateIntakeRecord([FromQuery] string token, int intakeId, int prescriptionId, [FromBody] UpdateIntakeDto updateIntakeDto)
+    {
+        try
+        {
+            var user = _authService.ValidateToken(token);
+            _intakeService.UpdateIntakeRecord(intakeId, updateIntakeDto, user, prescriptionId);
+            return NoContent();
+        }
+        catch (UnauthorizedException unex) 
+        {
+            return Unauthorized(unex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+    
+    //delete intakes
+    [HttpDelete("delete/{intakeId}")]
+    public ActionResult DeleteIntakeRecord([FromQuery] string token, int intakeId)
+    {
+        try
+        {
+            var user = _authService.ValidateToken(token);
+            _intakeService.DeleteIntakeRecord(intakeId);
             return NoContent();
         }
         catch (UnauthorizedException unex) 

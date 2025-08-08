@@ -18,6 +18,18 @@ public class PrescriptionController : ControllerBase
         _prescriptionService = prescriptionService;
     }
     
+    
+    // todo: проверяй чтобы в patientId был айди только пациента
+    [HttpGet("list/{patientId}")]
+    public ActionResult GetPrescriptionsByPatient([FromQuery] string token, int patientId)
+    {
+        var user = _authService.ValidateToken(token);
+        if (user.Role == UserRole.Patient) // todo тут сам реши какие роли это могут
+            return Unauthorized("Admin access required.");
+        var prescriptions = _prescriptionService.GetPrescriptionsByPatient(patientId);
+        return Ok(prescriptions);
+    }
+    
     //add prescriptions
     [HttpPost("add")]
     public ActionResult AddPrescription([FromQuery] string token, [FromBody] AddPrescriptionDto dto)
@@ -29,9 +41,46 @@ public class PrescriptionController : ControllerBase
         try
         {
             _prescriptionService.AddPrescription(dto, user);
-            
-            // todo: NO COntent
-            return Ok(new { message = "Prescription added successfully" });
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+    
+    
+    //update prescriptions
+    [HttpPut("update")]
+    public ActionResult UpdatePrescription([FromQuery] string token, [FromBody] UpdatePrescriptionDto dto,
+        int prescriptionId)
+    {
+        var user = _authService.ValidateToken(token);
+        if (user.Role != UserRole.Doctor)
+            return Unauthorized("You don't have permission to edit this prescription.");
+        try
+        {
+            _prescriptionService.UpdatePrescription(dto, prescriptionId);
+            //todo fix datetime issue
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+    
+    //delete prescriptions
+    [HttpDelete("delete")]
+    public ActionResult DeletePrescription([FromQuery] string token, int prescriptionId)
+    {
+        var user = _authService.ValidateToken(token);
+        if (user.Role == UserRole.Patient)
+            return Unauthorized("You don't have permission to perform this action.");
+        try
+        {
+            _prescriptionService.DeletePrescription(prescriptionId);
+            return NoContent();
         }
         catch (Exception ex)
         {
@@ -39,18 +88,7 @@ public class PrescriptionController : ControllerBase
         }
     }
 
-    // todo: проверяй чтобы в patientId был айди только пациента
-    [HttpGet("list/{patientId}")]
-    public ActionResult GetPrescriptionsByPatient([FromQuery] string token, int patientId)
-    {
-        
-        var user = _authService.ValidateToken(token);
-        if (user.Role == UserRole.Patient) // todo тут сам реши какие роли это могут
-            return Unauthorized("Admin access required.");
-
-        var prescriptions = _prescriptionService.GetPrescriptionsByPatient(patientId);
-        return Ok(prescriptions);
-    }
+    
 
     
 }

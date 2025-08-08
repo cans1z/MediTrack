@@ -8,7 +8,6 @@ public class PrescriptionService
     public List<Prescription> GetPrescriptionsByPatient(int patientId)
     {
         using var db = new ApplicationContext();
-
         return db.Prescriptions
             .Where(p => p.PatientId == patientId)
             .ToList();
@@ -18,7 +17,6 @@ public class PrescriptionService
     public void AddPrescription(AddPrescriptionDto dto, User doctor)
     {
         using var db = new ApplicationContext();
-// todo: проверяй чтобы в patientId был айди только пациента
         var patient = db.Users.FirstOrDefault(u => u.Id == dto.PatientId && u.Role == UserRole.Patient);
         if (patient == null) throw new Exception("Patient not found");
 
@@ -39,6 +37,40 @@ public class PrescriptionService
         };
 
         db.Prescriptions.Add(prescription);
+        db.SaveChanges();
+    }
+
+    public void UpdatePrescription(UpdatePrescriptionDto updatePrescriptionDto, int prescriptionId)
+    {
+        using var db = new ApplicationContext();
+        var upPrescription = db.Prescriptions.Where(p => p.Id == prescriptionId).FirstOrDefault();
+        if (upPrescription == null) throw new Exception("Prescription not found");
+        if (updatePrescriptionDto.PatientId != upPrescription.PatientId)
+            upPrescription.PatientId = updatePrescriptionDto.PatientId;
+        if (updatePrescriptionDto.MedicationId != upPrescription.MedicationId)
+            upPrescription.MedicationId = updatePrescriptionDto.MedicationId;
+        if (!string.IsNullOrWhiteSpace(updatePrescriptionDto.Dosage))
+            upPrescription.Dosage = updatePrescriptionDto.Dosage;
+        if (updatePrescriptionDto.IsFlexible.HasValue)
+            upPrescription.IsFlexible = updatePrescriptionDto.IsFlexible.Value;
+        if (updatePrescriptionDto.Frequency != upPrescription.Frequency)
+            upPrescription.Frequency = updatePrescriptionDto.Frequency;
+        /*if (updatePrescriptionDto.StartDate.HasValue)
+            upPrescription.StartDate = updatePrescriptionDto.StartDate;*/
+        if (updatePrescriptionDto.Period != upPrescription.Period)
+            upPrescription.Period = updatePrescriptionDto.Period;
+        if (!string.IsNullOrWhiteSpace(updatePrescriptionDto.Comment))
+            upPrescription.Comment = updatePrescriptionDto.Comment;
+        db.Prescriptions.Update(upPrescription);
+        db.SaveChanges();
+    }
+
+    public void DeletePrescription(int prescriptionId)
+    {
+        using var db = new ApplicationContext();
+        var prescription = db.Prescriptions.FirstOrDefault(p => p.Id == prescriptionId);
+        if (prescription == null) throw new Exception("Prescription not found");
+        db.Prescriptions.Remove(prescription);
         db.SaveChanges();
     }
 }
