@@ -66,14 +66,10 @@ public class IntakeService
              var upIntakeRecord = db.IntakeRecords.Find(intakeId);
              if(upIntakeRecord == null)
                  throw new Exception("Intake record not found");
-             if(upIntakeRecord.PrescriptionId != prescriptionId)
-                 upIntakeRecord.PrescriptionId = prescriptionId;
-             if (!string.IsNullOrWhiteSpace(updateIntakeDto.Comment))
-                 upIntakeRecord.Comment = updateIntakeDto.Comment;
-             if (!string.IsNullOrWhiteSpace(updateIntakeDto.Status))
-                 upIntakeRecord.Status = updateIntakeDto.Status;
-             /*if (updatePrescriptionDto.StartDate.HasValue)
-                 upPrescription.StartDate = updatePrescriptionDto.StartDate;*/
+             upIntakeRecord.PrescriptionId = prescriptionId;
+             upIntakeRecord.Comment = updateIntakeDto.Comment;
+             upIntakeRecord.Status = updateIntakeDto.Status;
+             upIntakeRecord.DateTaken = updateIntakeDto.DateTaken;
              db.IntakeRecords.Update(upIntakeRecord);
              db.SaveChanges();
          }

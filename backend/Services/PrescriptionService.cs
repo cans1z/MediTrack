@@ -45,22 +45,14 @@ public class PrescriptionService
         using var db = new ApplicationContext();
         var upPrescription = db.Prescriptions.Where(p => p.Id == prescriptionId).FirstOrDefault();
         if (upPrescription == null) throw new Exception("Prescription not found");
-        if (updatePrescriptionDto.PatientId != upPrescription.PatientId)
-            upPrescription.PatientId = updatePrescriptionDto.PatientId;
-        if (updatePrescriptionDto.MedicationId != upPrescription.MedicationId)
-            upPrescription.MedicationId = updatePrescriptionDto.MedicationId;
-        if (!string.IsNullOrWhiteSpace(updatePrescriptionDto.Dosage))
-            upPrescription.Dosage = updatePrescriptionDto.Dosage;
-        if (updatePrescriptionDto.IsFlexible.HasValue)
-            upPrescription.IsFlexible = updatePrescriptionDto.IsFlexible.Value;
-        if (updatePrescriptionDto.Frequency != upPrescription.Frequency)
-            upPrescription.Frequency = updatePrescriptionDto.Frequency;
-        /*if (updatePrescriptionDto.StartDate.HasValue)
-            upPrescription.StartDate = updatePrescriptionDto.StartDate;*/
-        if (updatePrescriptionDto.Period != upPrescription.Period)
-            upPrescription.Period = updatePrescriptionDto.Period;
-        if (!string.IsNullOrWhiteSpace(updatePrescriptionDto.Comment))
-            upPrescription.Comment = updatePrescriptionDto.Comment;
+        upPrescription.PatientId = updatePrescriptionDto.PatientId;
+        upPrescription.MedicationId = updatePrescriptionDto.MedicationId;
+        upPrescription.Dosage = updatePrescriptionDto.Dosage;
+        upPrescription.IsFlexible = updatePrescriptionDto.IsFlexible;
+        upPrescription.Frequency = updatePrescriptionDto.Frequency;
+        upPrescription.StartDate = updatePrescriptionDto.StartDate;
+        upPrescription.Period = updatePrescriptionDto.Period;
+        upPrescription.Comment = updatePrescriptionDto.Comment;
         db.Prescriptions.Update(upPrescription);
         db.SaveChanges();
     }
