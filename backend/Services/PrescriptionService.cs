@@ -17,7 +17,8 @@ public class PrescriptionService
     public void AddPrescription(AddPrescriptionDto dto, User doctor)
     {
         using var db = new ApplicationContext();
-        var patient = db.Users.FirstOrDefault(u => u.Id == dto.PatientId && u.Role == UserRole.Patient);
+        var patient = db.Users
+            .FirstOrDefault(u => u.Id == dto.PatientId && u.Role == UserRole.Patient);
         if (patient == null) throw new Exception("Patient not found");
 
         var medication = db.Medications.FirstOrDefault(m => m.Id == dto.MedicationId && !m.IsDeleted);
@@ -43,8 +44,13 @@ public class PrescriptionService
     public void UpdatePrescription(UpdatePrescriptionDto updatePrescriptionDto, int prescriptionId)
     {
         using var db = new ApplicationContext();
-        var upPrescription = db.Prescriptions.Where(p => p.Id == prescriptionId).FirstOrDefault();
+        
+        var upPrescription = db.Prescriptions
+            .Where(p => p.Id == prescriptionId)
+            .FirstOrDefault();
+        
         if (upPrescription == null) throw new Exception("Prescription not found");
+        
         upPrescription.PatientId = updatePrescriptionDto.PatientId;
         upPrescription.MedicationId = updatePrescriptionDto.MedicationId;
         upPrescription.Dosage = updatePrescriptionDto.Dosage;
@@ -52,7 +58,8 @@ public class PrescriptionService
         upPrescription.Frequency = updatePrescriptionDto.Frequency;
         upPrescription.StartDate = updatePrescriptionDto.StartDate;
         upPrescription.Period = updatePrescriptionDto.Period;
-        upPrescription.Comment = updatePrescriptionDto.Comment;
+        upPrescription.Comment = updatePrescriptionDto.Comment ?? string.Empty; // todo: я тут поправил
+        
         db.Prescriptions.Update(upPrescription);
         db.SaveChanges();
     }

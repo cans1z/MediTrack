@@ -56,7 +56,7 @@ public class PrescriptionController : ControllerBase
         int prescriptionId)
     {
         var user = _authService.ValidateToken(token);
-        if (user.Role != UserRole.Doctor)
+        if (user.Role == UserRole.Patient)
             return Unauthorized("You don't have permission to edit this prescription.");
         try
         {

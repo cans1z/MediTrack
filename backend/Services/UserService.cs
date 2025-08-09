@@ -21,6 +21,7 @@ public class UserService
 
     public void DeleteUser(int userId)
     {
+        // todo: так то норм, но лучше загугли что такое ExecuteDelete
         using (var db = new ApplicationContext())
         {
             var userToDelete = db.Users.FirstOrDefault(u => u.Id == userId);
@@ -31,6 +32,7 @@ public class UserService
         } 
     }
 
+    // TODO: аналогично для того что ты делал в UpdatePrescription.
     public void UpdateUser(UpdateUserDto updateUserUserDto, int userId)
     {
         using (var db = new ApplicationContext())
@@ -58,7 +60,9 @@ public class UserService
         using (var db = new ApplicationContext())
         {
             var users = db.Users.ToList();
-            var result = users.Select(u => GetUserDto.FromUser(u)).ToList();
+            var result = users
+                .Select(GetUserDto.FromUser) // todo: было "u => GetUserDto.FromUser(u)", но лучше так пиши, так короче и красивее
+                .ToList();
             return result;
         }
     }

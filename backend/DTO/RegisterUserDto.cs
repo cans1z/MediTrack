@@ -5,9 +5,10 @@ namespace MediTrack.DTO;
 
 public class RegisterUserDto
 {
-    public string UserName { get; set; }    
-    public string Password { get; set; }
-    public string Email { get; set; }
+    public string UserName { get; set; }  // todo: валидация (мин. кол-во символов)
+    public string Password { get; set; } // todo: валидация (мин. кол-во символов)
+    public string Email { get; set; } // todo: валидация (мин. кол-во символов, regex эл. почты)
+    
     [DefaultValue("Patient")]
     public UserRole Role { get; set; }
 

@@ -3,7 +3,7 @@ using MediTrack.Types;
 namespace MediTrack.DTO;
 
 public class GetUserDto
-{
+{ // todo: id тоже возвращай
     public string UserName { get; set; }
     public string Email { get; set; }
     public UserRole Role { get; set; }
