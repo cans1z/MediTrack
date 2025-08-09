@@ -4,6 +4,7 @@ namespace MediTrack.DTO;
 
 public class GetUserDto
 { // todo: id тоже возвращай
+    public int Id { get; set; }
     public string UserName { get; set; }
     public string Email { get; set; }
     public UserRole Role { get; set; }
@@ -13,6 +14,7 @@ public class GetUserDto
     {
         return new GetUserDto
         {
+            Id = user.Id,
             UserName = user.UserName,
             Email = user.Email,
             Role = user.Role,

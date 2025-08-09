@@ -40,16 +40,11 @@ public class UserService
             var upUser = db.Users.FirstOrDefault(u => u.Id == userId);
             if (upUser == null)
                 throw new UserNotFoundException();
-            if (!string.IsNullOrWhiteSpace(updateUserUserDto.Email))
-                upUser.Email = updateUserUserDto.Email;
-            if (!string.IsNullOrWhiteSpace(updateUserUserDto.Password))
-                upUser.Password = updateUserUserDto.Password;
-            if (updateUserUserDto.Role.HasValue)
-                upUser.Role = updateUserUserDto.Role.Value;
-            if (!string.IsNullOrWhiteSpace(updateUserUserDto.Name))
-                upUser.UserName = updateUserUserDto.Name;
-            if (updateUserUserDto.IsBanned.HasValue)
-                upUser.IsBanned = updateUserUserDto.IsBanned.Value;
+            upUser.Email = updateUserUserDto.Email;
+            upUser.Password = updateUserUserDto.Password;
+            upUser.Role = updateUserUserDto.Role;
+            upUser.UserName = updateUserUserDto.Name;
+            upUser.IsBanned = updateUserUserDto.IsBanned;
             db.Users.Update(upUser);
             db.SaveChanges();
         }

@@ -22,7 +22,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var token = _authService.Login(data.UserName, data.Password);
+            var token = _authService.Login(data.Email, data.Password);
             return Ok(new { token });
         }
         catch (UnauthorizedException)
