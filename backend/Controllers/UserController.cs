@@ -73,6 +73,8 @@ public class UserController : ControllerBase
     [HttpPost("register")]
     public ActionResult Register([FromQuery] string token, [FromBody]RegisterUserDto registerUserUserDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         try
         {
             var user = _authService.ValidateToken(token);
@@ -124,6 +126,8 @@ public class UserController : ControllerBase
     [HttpPatch("update/{userId}")]
     public ActionResult UpdateUser([FromQuery] string token, [FromBody] UpdateUserDto updateUserUserDto, [FromRoute] int userId)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         try
         {
             var user = _authService.ValidateToken(token);

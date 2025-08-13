@@ -43,6 +43,8 @@ public class IntakeController : ControllerBase
     [HttpPut("create/{prescriptionId}")] // пока в Query)))
     public ActionResult AddIntakeRecord([FromQuery] string token, int prescriptionId,  [FromBody] AddIntakeDto addIntakeDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         try
         {
             var user = _authService.ValidateToken(token);
@@ -63,6 +65,8 @@ public class IntakeController : ControllerBase
     [HttpPatch("update/{intakeId}")]
     public ActionResult UpdateIntakeRecord([FromQuery] string token, int intakeId, int prescriptionId, [FromBody] UpdateIntakeDto updateIntakeDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         try
         {
             var user = _authService.ValidateToken(token);
